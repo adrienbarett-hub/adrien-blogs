@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Adrien B — Dev Blog</title>
+  <meta name="description" content="A developer blog by Adrien B covering Micro:bit projects, MakeCode, and beginner-friendly coding tutorials."/>
+  <meta name="author" content="Adrien B"/>
+  <meta name="keywords" content="Micro:bit, MakeCode, TypeScript, BBC Micro:bit, beginner coding, game development, reaction game"/>
+  <meta name="robots" content="index, follow"/>
+  <link rel="canonical" href="https://adrienb.github.io/"/>
+  <!-- Open Graph (social sharing previews) -->
+  <meta property="og:title" content="Adrien B — Dev Blog"/>
+  <meta property="og:description" content="Micro:bit projects and beginner coding tutorials by Adrien B."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://adrienb.github.io/"/>
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:title" content="Adrien B — Dev Blog"/>
+  <meta name="twitter:description" content="Micro:bit projects and beginner coding tutorials by Adrien B."/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Newsreader:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f7f6f2;
+      --surface: #ffffff;
+      --border: #e2e0d8;
+      --text: #1a1916;
+      --muted: #7a7870;
+      --accent: #2a6ef5;
+      --tag-bg: #eef2ff;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Newsreader', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+    header {
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .header-inner {
+      max-width: 780px; margin: 0 auto; padding: 0 24px;
+      height: 56px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .site-name {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 14px; font-weight: 600; letter-spacing: 0.04em;
+      color: var(--text); text-decoration: none;
+    }
+    .site-name span { color: var(--accent); }
+    nav a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 12px; color: var(--muted); text-decoration: none;
+      margin-left: 20px; letter-spacing: 0.03em; transition: color 0.2s;
+    }
+    nav a:hover { color: var(--accent); }
+    main { max-width: 780px; margin: 0 auto; padding: 60px 24px 100px; }
+    .page-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 40px;
+    }
+    .post-card {
+      border: 1px solid var(--border); background: var(--surface);
+      border-radius: 4px; padding: 32px 36px;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .post-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 24px rgba(42,110,245,0.08);
+    }
+    .post-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .post-tag {
+      font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em;
+      background: var(--tag-bg); color: var(--accent); padding: 3px 8px; border-radius: 3px;
+    }
+    .post-date { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
+    .post-card h2 { font-size: 1.5rem; font-weight: 600; line-height: 1.3; margin-bottom: 8px; }
+    .post-card .subtitle { font-style: italic; color: var(--muted); font-size: 1rem; margin-bottom: 18px; }
+    .post-preview {
+      font-size: 0.95rem; color: #4a4840; line-height: 1.65; margin-bottom: 22px;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .post-info { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 24px; }
+    .info-pill {
+      font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted);
+      background: var(--bg); border: 1px solid var(--border); padding: 4px 10px; border-radius: 20px;
+    }
+    .info-pill strong { color: var(--text); }
+    .read-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'IBM Plex Mono', monospace; font-size: 13px;
+      color: var(--accent); text-decoration: none; font-weight: 600;
+      letter-spacing: 0.02em; transition: gap 0.2s;
+    }
+    .read-link:hover { gap: 10px; }
+    .read-link svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    footer { border-top: 1px solid var(--border); padding: 28px 24px; text-align: center; }
+    footer p { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
+    footer a { color: var(--accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="site-name" href="#"><span>//</span> adrien.dev</a>
+    <nav><a href="#">Posts</a><a href="#">About</a></nav>
+  </div>
+</header>
+<main>
+  <p class="page-label">Latest posts</p>
+  <article class="post-card">
+    <div class="post-meta">
+      <span class="post-tag">Micro:bit</span>
+      <span class="post-tag">TypeScript</span>
+      <span class="post-date">2025</span>
+    </div>
+    <h2>Thumb Speed Test</h2>
+    <p class="subtitle">A Micro:bit reaction game — how fast is your thumb?</p>
+    <p class="post-preview">
+      A simple but fun reaction game for the BBC Micro:bit. Tap Button A as many times as possible in 10 seconds. The LED display lights up when the game starts, counts every tap with a beep, then scrolls your score at the end. Built with MakeCode blocks and TypeScript — includes full source code you can paste straight into the editor.
+    </p>
+    <div class="post-info">
+      <span class="info-pill"><strong>Difficulty</strong>&nbsp; Beginner / Intermediate</span>
+      <span class="info-pill"><strong>Language</strong>&nbsp; TypeScript · MakeCode</span>
+      <span class="info-pill"><strong>Hardware</strong>&nbsp; BBC Micro:bit (any version)</span>
+      <span class="info-pill"><strong>Game Length</strong>&nbsp; 10 seconds per round</span>
+    </div>
+    <a class="read-link"
+       href="https://docs.google.com/document/d/1g9unZWdONeYexOX3SlImcxubKOf_lir2H3SIpZCcARA/edit?tab=t.0"
+       target="_blank" rel="noopener">
+      Read full post
+      <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </article>
+</main>
+<footer>
+  <p>Written by Adrien B &nbsp;·&nbsp; Content released under <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank">CC0 1.0</a></p>
+</footer>
+</body>
+</html>
