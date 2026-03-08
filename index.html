@@ -104,44 +104,83 @@
     footer p { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); }
     footer a { color: var(--accent); text-decoration: none; }
     footer a:hover { text-decoration: underline; }
+    .page { display: none; }
+    .page.active { display: block; }
+    nav a.active { color: var(--text); }
+    .about-card { border: 1px solid var(--border); background: var(--surface); border-radius: 4px; padding: 40px 36px; }
+    .about-card h2 { font-size: 1.4rem; font-weight: 600; margin-bottom: 20px; }
+    .about-body { font-size: 1rem; color: #4a4840; line-height: 1.75; margin-bottom: 16px; }
+    .about-tags { margin-top: 24px; }
+    .about-tag { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 11px; background: var(--tag-bg); color: var(--accent); padding: 3px 8px; border-radius: 3px; margin: 4px 4px 0 0; }
   </style>
 </head>
 <body>
 <header>
   <div class="header-inner">
     <a class="site-name" href="#"><span>//</span> adrien.dev</a>
-    <nav><a href="#">Posts</a><a href="#">About</a></nav>
+    <nav>
+      <a href="#" onclick="showPage('posts', this)" class="active">Posts</a>
+      <a href="#" onclick="showPage('about', this)">About</a>
+    </nav>
   </div>
 </header>
 <main>
-  <p class="page-label">Latest posts</p>
-  <article class="post-card">
-    <div class="post-meta">
-      <span class="post-tag">Micro:bit</span>
-      <span class="post-tag">TypeScript</span>
-      <span class="post-date">2025</span>
+  <!-- Posts page -->
+  <div id="page-posts" class="page active">
+    <p class="page-label">Latest posts</p>
+    <article class="post-card">
+      <div class="post-meta">
+        <span class="post-tag">Micro:bit</span>
+        <span class="post-tag">TypeScript</span>
+        <span class="post-date">2025</span>
+      </div>
+      <h2>Thumb Speed Test</h2>
+      <p class="subtitle">A Micro:bit reaction game — how fast is your thumb?</p>
+      <p class="post-preview">
+        A simple but fun reaction game for the BBC Micro:bit. Tap Button A as many times as possible in 10 seconds. The LED display lights up when the game starts, counts every tap with a beep, then scrolls your score at the end. Built with MakeCode blocks and TypeScript — includes full source code you can paste straight into the editor.
+      </p>
+      <div class="post-info">
+        <span class="info-pill"><strong>Difficulty</strong>&nbsp; Beginner / Intermediate</span>
+        <span class="info-pill"><strong>Language</strong>&nbsp; TypeScript · MakeCode</span>
+        <span class="info-pill"><strong>Hardware</strong>&nbsp; BBC Micro:bit (any version)</span>
+        <span class="info-pill"><strong>Game Length</strong>&nbsp; 10 seconds per round</span>
+      </div>
+      <a class="read-link" href="thumb_speed_test_blog.html">
+        Read full post
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </article>
+  </div>
+
+  <!-- About page -->
+  <div id="page-about" class="page">
+    <p class="page-label">About</p>
+    <div class="about-card">
+      <h2>Hi, I'm Adrien B 👋</h2>
+      <p class="about-body">I'm a student who is passionate about coding and technology. I teach classes on how to code Micro:bits at my school to a group of about 10 students.</p>
+      <p class="about-body">I made this website to share blogs about the original projects I've built for my class — so my students (and anyone else!) can follow along, learn, and try them out.</p>
+      <p class="about-body">P.S. cats rule 😺</p>
+      <div class="about-tags">
+        <span class="about-tag">Micro:bit</span>
+        <span class="about-tag">MakeCode</span>
+        <span class="about-tag">TypeScript</span>
+        <span class="about-tag">Teaching</span>
+        <span class="about-tag">Student</span>
+      </div>
     </div>
-    <h2>Thumb Speed Test</h2>
-    <p class="subtitle">A Micro:bit reaction game — how fast is your thumb?</p>
-    <p class="post-preview">
-      A simple but fun reaction game for the BBC Micro:bit. Tap Button A as many times as possible in 10 seconds. The LED display lights up when the game starts, counts every tap with a beep, then scrolls your score at the end. Built with MakeCode blocks and TypeScript — includes full source code you can paste straight into the editor.
-    </p>
-    <div class="post-info">
-      <span class="info-pill"><strong>Difficulty</strong>&nbsp; Beginner / Intermediate</span>
-      <span class="info-pill"><strong>Language</strong>&nbsp; TypeScript · MakeCode</span>
-      <span class="info-pill"><strong>Hardware</strong>&nbsp; BBC Micro:bit (any version)</span>
-      <span class="info-pill"><strong>Game Length</strong>&nbsp; 10 seconds per round</span>
-    </div>
-    <a class="read-link"
-       href="thumb_speed_test_blog.html"
-       target="_blank" rel="noopener">
-      Read full post
-      <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-    </a>
-  </article>
+  </div>
 </main>
 <footer>
   <p>Written by Adrien B &nbsp;·&nbsp; Content released under <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank">CC0 1.0</a></p>
 </footer>
+<script>
+  function showPage(name, link) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    link.classList.add('active');
+    return false;
+  }
+</script>
 </body>
 </html>
