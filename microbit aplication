@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>micro:bit Course — Reserve Your Spot</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050a0e;
+    --surface: #0a1520;
+    --surface2: #0f1f30;
+    --border: #1a4060;
+    --accent: #00d4ff;
+    --accent2: #00ff9f;
+    --accent3: #ff6b35;
+    --text: #c8e8f0;
+    --text-dim: #4a7a90;
+    --glow: rgba(0,212,255,0.15);
+    --glow2: rgba(0,255,159,0.1);
+    --font-mono: 'Share Tech Mono', monospace;
+    --font-display: 'Orbitron', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Circuit board background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.2;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Animated circuit traces */
+  .circuit-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .trace {
+    position: absolute;
+    background: var(--accent);
+    opacity: 0;
+    animation: tracePulse 4s infinite;
+  }
+  .trace.h { height: 1px; width: 120px; }
+  .trace.v { width: 1px; height: 80px; }
+  .trace:nth-child(1)  { top: 15%; left: 5%;   animation-delay: 0s; }
+  .trace:nth-child(2)  { top: 15%; left: 5%; width: 1px; height: 60px; animation-delay: 0.3s; }
+  .trace:nth-child(3)  { top: 30%; left: 80%; width: 100px; animation-delay: 1s; }
+  .trace:nth-child(4)  { top: 30%; left: 88%; width: 1px; height: 50px; animation-delay: 1.3s; }
+  .trace:nth-child(5)  { top: 70%; left: 10%; width: 80px; animation-delay: 2s; }
+  .trace:nth-child(6)  { top: 60%; left: 10%; width: 1px; height: 80px; animation-delay: 2.3s; }
+  .trace:nth-child(7)  { top: 85%; left: 60%; width: 140px; animation-delay: 0.5s; }
+  .trace:nth-child(8)  { top: 78%; left: 60%; width: 1px; height: 56px; animation-delay: 0.8s; }
+  .trace:nth-child(9)  { top: 45%; left: 2%;  width: 60px;  animation-delay: 3s; }
+  .trace:nth-child(10) { top: 45%; left: 2%;  width: 1px; height: 40px; animation-delay: 3.2s; }
+
+  .node {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    animation: nodePulse 4s infinite;
+  }
+  .node:nth-child(11) { top: 15%; left: 5%; animation-delay: 0.2s; }
+  .node:nth-child(12) { top: 30%; left: 88%; animation-delay: 1.1s; }
+  .node:nth-child(13) { top: 70%; left: 10%; animation-delay: 2.1s; }
+  .node:nth-child(14) { top: 85%; left: 74%; animation-delay: 0.6s; }
+
+  @keyframes tracePulse {
+    0%,100% { opacity: 0; }
+    20%,80% { opacity: 0.4; }
+    50% { opacity: 0.7; box-shadow: 0 0 8px var(--accent); }
+  }
+  @keyframes nodePulse {
+    0%,100% { opacity: 0; transform: scale(0.5); }
+    30%,70% { opacity: 1; transform: scale(1); box-shadow: 0 0 12px var(--accent); }
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .chip-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--accent);
+    padding: 6px 16px;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 20px;
+    background: rgba(0,212,255,0.05);
+    text-transform: uppercase;
+  }
+  .chip-badge::before, .chip-badge::after {
+    content: '▶';
+    font-size: 8px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 5vw, 38px);
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    text-shadow: 0 0 30px rgba(0,212,255,0.4);
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+
+  .session-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 10px 20px;
+    border: 1px solid var(--accent2);
+    background: rgba(0,255,159,0.05);
+    color: var(--accent2);
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); animation: blink 1.2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  /* Course description */
+  .course-description {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 24px 28px;
+    margin-bottom: 32px;
+    position: relative;
+    line-height: 1.7;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .course-description::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 20px; right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+  }
+  .course-description p { margin-bottom: 12px; }
+  .course-description p:last-child { margin-bottom: 0; }
+  .ask-question { font-size: 12px; color: var(--text-dim); }
+  .ask-link {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(0,212,255,0.3);
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .ask-link:hover { color: var(--accent2); border-color: var(--accent2); }
+
+  /* Week Selector */
+  .section-label {
+    font-family: var(--font-display);
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+
+  .week-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .week-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.2s;
+  }
+  .week-card:hover { border-color: var(--accent); background: var(--surface2); }
+  .week-card:hover::before { transform: scaleX(1); }
+  .week-card.selected {
+    border-color: var(--accent);
+    background: var(--glow);
+    box-shadow: 0 0 20px rgba(0,212,255,0.15), inset 0 0 20px rgba(0,212,255,0.05);
+  }
+  .week-card.selected::before { transform: scaleX(1); }
+
+  .week-num {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .week-card.selected .week-num { text-shadow: 0 0 12px var(--accent); }
+  .week-date { font-size: 10px; color: var(--text-dim); }
+  .week-label { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; margin-top: 2px; }
+
+  .week-count {
+    position: absolute;
+    top: 8px; right: 8px;
+    font-size: 9px;
+    color: var(--accent2);
+    background: rgba(0,255,159,0.1);
+    border: 1px solid rgba(0,255,159,0.3);
+    padding: 1px 5px;
+  }
+
+  /* Form */
+  .form-panel {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 28px;
+    position: relative;
+    margin-bottom: 32px;
+  }
+  .form-panel::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 20px; right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  .corner {
+    position: absolute;
+    width: 10px; height: 10px;
+    border-color: var(--accent);
+    border-style: solid;
+  }
+  .corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+  .corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+  .corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+  .corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+  .form-row { margin-bottom: 20px; }
+  label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  input, select {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), 0 0 16px rgba(0,212,255,0.1);
+  }
+  input::placeholder { color: var(--text-dim); }
+  select option { background: var(--surface); }
+
+  .submit-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+    z-index: 0;
+  }
+  .submit-btn:hover::before { transform: scaleX(1); }
+  .submit-btn:hover { color: var(--bg); }
+  .submit-btn span { position: relative; z-index: 1; }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 32px; right: 32px;
+    background: var(--surface2);
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+    padding: 16px 24px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    box-shadow: 0 0 30px rgba(0,255,159,0.2);
+    z-index: 100;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s;
+    max-width: 320px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.error { border-color: var(--accent3); color: var(--accent3); box-shadow: 0 0 30px rgba(255,107,53,0.2); }
+
+  /* Admin toggle */
+  .admin-toggle {
+    text-align: center;
+    margin-top: 40px;
+  }
+  .admin-link {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+  .admin-link:hover { color: var(--accent3); }
+
+  /* Admin Panel */
+  .admin-panel { display: none; }
+  .admin-panel.active { display: block; }
+
+  .admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: gap;
+    gap: 12px;
+  }
+
+  .export-btn {
+    background: transparent;
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .export-btn:hover { background: rgba(0,255,159,0.1); }
+
+  .filter-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .tab {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .tab.active, .tab:hover { border-color: var(--accent); color: var(--accent); background: rgba(0,212,255,0.05); }
+
+  .reservations-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .reservations-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-family: var(--font-display);
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase;
+  }
+  .reservations-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(26,64,96,0.4);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  .reservations-table tr:hover td { background: rgba(0,212,255,0.03); }
+
+  .week-tag {
+    display: inline-block;
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    color: var(--accent);
+    padding: 2px 8px;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  .delete-btn {
+    background: none;
+    border: 1px solid rgba(255,107,53,0.3);
+    color: var(--accent3);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .delete-btn:hover { background: rgba(255,107,53,0.1); border-color: var(--accent3); }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-dim);
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.3; }
+
+  /* Auth */
+  .auth-panel {
+    max-width: 360px;
+    margin: 0 auto;
+    padding: 32px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    position: relative;
+  }
+  .auth-panel .section-label { justify-content: center; }
+  .auth-panel .section-label::after { display: none; }
+
+  /* Stats */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+    text-shadow: 0 0 20px rgba(0,212,255,0.3);
+  }
+  .stat-label { font-size: 9px; color: var(--text-dim); letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+
+  .scan-line {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.3;
+    animation: scanLine 6s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  @keyframes scanLine {
+    0% { top: 0; }
+    100% { top: 100vh; }
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,10,14,0.85);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .modal-backdrop.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    padding: 32px;
+    max-width: 480px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 0 60px rgba(0,212,255,0.15);
+    transform: translateY(20px);
+    transition: transform 0.25s;
+  }
+  .modal-backdrop.open .modal { transform: translateY(0); }
+  .modal::before {
+    content: '';
+    position: absolute;
+    top: -1px; left: 20px; right: 20px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: #fff;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .modal-subtitle {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    width: 28px; height: 28px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { border-color: var(--accent3); color: var(--accent3); }
+  textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 12px 14px;
+    outline: none;
+    resize: vertical;
+    min-height: 100px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), 0 0 16px rgba(0,212,255,0.1);
+  }
+  textarea::placeholder { color: var(--text-dim); }
+
+  /* Admin checkbox & comment */
+  .admitted-check {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: border-color 0.2s;
+    vertical-align: middle;
+  }
+  .admitted-check:checked {
+    background: rgba(0,255,159,0.1);
+    border-color: var(--accent2);
+  }
+  .admitted-check:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    color: var(--accent2);
+    font-size: 11px;
+    line-height: 1;
+  }
+  .comment-input {
+    width: 120px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 4px 8px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .comment-input:focus { border-color: var(--accent); }
+
+  /* Admin section tabs */
+  .admin-section-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .admin-section-tab {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-dim);
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: 3px;
+    padding: 12px 24px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    margin-bottom: -1px;
+    position: relative;
+  }
+  .admin-section-tab:hover { color: var(--text); }
+  .admin-section-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  .q-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent3);
+    color: var(--bg);
+    font-size: 9px;
+    font-family: var(--font-mono);
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  /* Question cards */
+  .question-card {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    padding: 20px 24px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent3);
+  }
+  .question-card.answered::before { background: var(--accent2); }
+  .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .q-name { font-size: 13px; color: var(--text); }
+  .q-email { font-size: 11px; color: var(--text-dim); }
+  .q-date { font-size: 10px; color: var(--text-dim); margin-left: auto; }
+  .q-text {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+  }
+  .q-answer-label {
+    font-family: var(--font-display);
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .q-answer-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 10px 12px;
+    outline: none;
+    resize: vertical;
+    min-height: 70px;
+    transition: border-color 0.2s;
+  }
+  .q-answer-input:focus { border-color: var(--accent2); }
+  .q-actions { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+  .q-save-btn {
+    background: transparent;
+    border: 1px solid var(--accent2);
+    color: var(--accent2);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+  .q-save-btn:hover { background: rgba(0,255,159,0.1); }
+  .q-delete-btn {
+    background: none;
+    border: 1px solid rgba(255,107,53,0.3);
+    color: var(--accent3);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: auto;
+  }
+  .q-delete-btn:hover { background: rgba(255,107,53,0.1); border-color: var(--accent3); }
+  .q-answered-tag {
+    font-size: 9px;
+    color: var(--accent2);
+    border: 1px solid rgba(0,255,159,0.3);
+    padding: 2px 8px;
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 600px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .reservations-table th:nth-child(3),
+    .reservations-table td:nth-child(3) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scan-line"></div>
+
+<div class="circuit-overlay">
+  <div class="trace h"></div>
+  <div class="trace v"></div>
+  <div class="trace h"></div>
+  <div class="trace v"></div>
+  <div class="trace h"></div>
+  <div class="trace v"></div>
+  <div class="trace h"></div>
+  <div class="trace v"></div>
+  <div class="trace h"></div>
+  <div class="trace v"></div>
+  <div class="node"></div>
+  <div class="node"></div>
+  <div class="node"></div>
+  <div class="node"></div>
+</div>
+
+<div class="container">
+
+  <!-- Student View -->
+  <div id="studentView">
+    <div class="header">
+      <div class="chip-badge">LCCS · Circle Space</div>
+      <h1>Coding Course</h1>
+      <div class="subtitle">Sessions start on April 13th</div>
+      <div class="session-info">
+        <span class="dot"></span>
+        Reservations Open
+      </div>
+    </div>
+
+    <div class="course-description">
+      <p>Register for Circle Space's Micro:Bit Coding Course! Led by a 7th-grade student passionate about coding, this is a weekly 1-hour session on Mondays from 3:30 to 4:40pm — no experience needed.</p>
+      <p class="ask-question">Have a question before registering? <a href="#" class="ask-link" onclick="openQuestionModal(); return false;">Ask a question</a></p>
+    </div>
+
+    <div class="form-panel" id="formPanel">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+
+      <div class="section-label" style="margin-bottom:20px;">Your Information</div>
+
+      <div class="form-row">
+        <label>Full Name</label>
+        <input type="text" id="nameInput" placeholder="Enter your name" />
+      </div>
+      <div class="form-row">
+        <label>Class / Grade</label>
+        <input type="text" id="classInput" placeholder="e.g. 7B, Grade 8..." />
+      </div>
+      <div class="form-row">
+        <label>Email Address</label>
+        <input type="email" id="emailInput" placeholder="your@email.com" />
+      </div>
+
+      <button class="submit-btn" onclick="submitReservation()">
+        <span>⬡ &nbsp;Reserve Spot</span>
+      </button>
+    </div>
+
+    <div class="admin-toggle">
+      <button class="admin-link" onclick="showAdminAuth()">[ admin access ]</button>
+    </div>
+  </div>
+
+  <!-- Admin Auth -->
+  <div id="adminAuth" style="display:none;">
+    <div class="auth-panel">
+      <div class="corner tl"></div>
+      <div class="corner tr"></div>
+      <div class="corner bl"></div>
+      <div class="corner br"></div>
+      <div class="section-label" style="margin-bottom:24px; justify-content:center;">Admin Access</div>
+      <div class="form-row">
+        <label>Password</label>
+        <input type="password" id="adminPass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter') checkAdmin()" />
+      </div>
+      <button class="submit-btn" onclick="checkAdmin()"><span>⬡ &nbsp;Enter</span></button>
+      <div style="text-align:center; margin-top:20px;">
+        <button class="admin-link" onclick="backToStudent()">← back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div id="adminView" class="admin-panel">
+    <div class="header">
+      <div class="chip-badge">Admin Mode</div>
+      <h1>Reservations<br>Dashboard</h1>
+    </div>
+
+    <div class="stats-row" id="statsRow"></div>
+
+    <!-- Admin section tabs -->
+    <div class="admin-section-tabs">
+      <button class="admin-section-tab active" id="tabRegistrations" onclick="switchAdminTab('registrations')">Registrations</button>
+      <button class="admin-section-tab" id="tabQuestions" onclick="switchAdminTab('questions')">Questions <span id="questionsBadge" class="q-badge" style="display:none"></span></button>
+    </div>
+
+    <!-- Registrations -->
+    <div id="sectionRegistrations">
+      <div class="admin-header">
+        <div class="section-label" style="margin-bottom:0; flex:1;">All Registrations</div>
+        <button class="export-btn" onclick="exportCSV()">⬡ Export CSV</button>
+      </div>
+
+      <div class="filter-tabs" id="filterTabs"></div>
+
+      <div style="border:1px solid var(--border); background:var(--surface); overflow-x:auto;">
+        <table class="reservations-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Class</th>
+              <th>Email</th>
+              <th>Registered</th>
+              <th>Admitted</th>
+              <th>Comment</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="reservationsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Questions -->
+    <div id="sectionQuestions" style="display:none;">
+      <div class="admin-header">
+        <div class="section-label" style="margin-bottom:0; flex:1;">Student Questions</div>
+      </div>
+      <div id="questionsList"></div>
+    </div>
+
+    <div style="text-align:center; margin-top:32px;">
+      <button class="admin-link" onclick="logout()">[ logout ]</button>
+    </div>
+  </div>
+
+<!-- Ask a Question Modal -->
+<div class="modal-backdrop" id="questionModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeQuestionModal()">✕</button>
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div class="modal-title">Ask a Question</div>
+    <div class="modal-subtitle">Have something on your mind about the micro:bit coding course? We'd love to help!</div>
+    <div class="form-row">
+      <label>Your Name</label>
+      <input type="text" id="qName" placeholder="Enter your name" />
+    </div>
+    <div class="form-row">
+      <label>Email Address</label>
+      <input type="email" id="qEmail" placeholder="your@email.com" />
+    </div>
+    <div class="form-row">
+      <label>Your Question</label>
+      <textarea id="qText" placeholder="Type your question here..."></textarea>
+    </div>
+    <button class="submit-btn" onclick="submitQuestion()"><span>⬡ &nbsp;Send Question</span></button>
+  </div>
+</div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const ADMIN_PASSWORD = "microbit2025";
+  const STORAGE_KEY = "microbit_reservations";
+
+  // Generate Mondays — next 12 Mondays from today
+  function getUpcomingMondays(count = 12) {
+    const mondays = [];
+    const today = new Date();
+    const d = new Date(today);
+    // Find next Monday
+    const day = d.getDay();
+    const daysUntilMonday = day === 1 ? 0 : (8 - day) % 7;
+    d.setDate(d.getDate() + daysUntilMonday);
+    for (let i = 0; i < count; i++) {
+      mondays.push(new Date(d));
+      d.setDate(d.getDate() + 7);
+    }
+    return mondays;
+  }
+
+  const SESSIONS = getUpcomingMondays(12).map((date, i) => ({
+    id: `w${i+1}`,
+    label: `Session ${i+1}`,
+    date: date.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }),
+    dateShort: date.toLocaleDateString('en-US', { month:'short', day:'numeric' }),
+    dateKey: date.toISOString().split('T')[0],
+  }));
+
+  let selectedSession = null;
+  let activeFilter = 'all';
+
+  function getReservations() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function saveReservations(arr) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+  }
+
+  function countForSession(sessionId) {
+    return getReservations().filter(r => r.sessionId === sessionId).length;
+  }
+
+  function renderWeekGrid() {
+    const grid = document.getElementById('weekGrid');
+    grid.innerHTML = SESSIONS.map(s => {
+      const count = countForSession(s.id);
+      return `
+        <div class="week-card ${selectedSession === s.id ? 'selected' : ''}" onclick="selectSession('${s.id}')">
+          ${count > 0 ? `<div class="week-count">${count}</div>` : ''}
+          <div class="week-num">${(SESSIONS.indexOf(s)+1).toString().padStart(2,'0')}</div>
+          <div class="week-date">${s.dateShort}</div>
+          <div class="week-label">Monday · 3:30PM</div>
+        </div>`;
+    }).join('');
+  }
+
+  function selectSession(id) {
+    selectedSession = id;
+    renderWeekGrid();
+  }
+
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show' + (isError ? ' error' : '');
+    setTimeout(() => t.className = 'toast', 3000);
+  }
+
+  function submitReservation() {
+    const name = document.getElementById('nameInput').value.trim();
+    const cls  = document.getElementById('classInput').value.trim();
+    const email = document.getElementById('emailInput').value.trim();
+
+    if (!name) return showToast('⚠ Please enter your name', true);
+    if (!cls)  return showToast('⚠ Please enter your class', true);
+    if (!email || !email.includes('@')) return showToast('⚠ Please enter a valid email', true);
+
+    const reservations = getReservations();
+    const dup = reservations.find(r => r.email.toLowerCase() === email.toLowerCase());
+    if (dup) return showToast('⚠ This email is already registered', true);
+
+    reservations.push({
+      id: Date.now(),
+      name, cls, email,
+      sessionId: 'weekly',
+      sessionDate: 'Every Monday',
+      sessionLabel: 'Weekly — Mondays 3:30–4:40PM',
+      timestamp: new Date().toISOString(),
+    });
+
+    saveReservations(reservations);
+    showToast('✓ Registered! See you Mondays at 3:30PM');
+
+    document.getElementById('nameInput').value = '';
+    document.getElementById('classInput').value = '';
+    document.getElementById('emailInput').value = '';
+  }
+
+  // Admin
+  function showAdminAuth() {
+    document.getElementById('studentView').style.display = 'none';
+    document.getElementById('adminAuth').style.display = 'block';
+    setTimeout(() => document.getElementById('adminPass').focus(), 100);
+  }
+
+  function backToStudent() {
+    document.getElementById('adminAuth').style.display = 'none';
+    document.getElementById('studentView').style.display = 'block';
+  }
+
+  function checkAdmin() {
+    const pass = document.getElementById('adminPass').value;
+    if (pass === ADMIN_PASSWORD) {
+      document.getElementById('adminAuth').style.display = 'none';
+      document.getElementById('adminView').classList.add('active');
+      renderAdmin();
+    } else {
+      showToast('⚠ Incorrect password', true);
+      document.getElementById('adminPass').value = '';
+    }
+  }
+
+  function logout() {
+    document.getElementById('adminView').classList.remove('active');
+    document.getElementById('studentView').style.display = 'block';
+    document.getElementById('adminPass').value = '';
+  }
+
+  function renderAdmin() {
+    const all = getReservations();
+    const questions = getQuestions();
+    const unanswered = questions.filter(q => !q.answer).length;
+
+    // Stats
+    document.getElementById('statsRow').innerHTML = `
+      <div class="stat-card"><span class="stat-num">${all.length}</span><div class="stat-label">Registered</div></div>
+      <div class="stat-card"><span class="stat-num">${all.filter(r=>r.admitted).length}</span><div class="stat-label">Admitted</div></div>
+      <div class="stat-card"><span class="stat-num">${questions.length}</span><div class="stat-label">Questions</div></div>
+    `;
+
+    // Update question badge
+    const badge = document.getElementById('questionsBadge');
+    if (unanswered > 0) { badge.style.display = 'inline-flex'; badge.textContent = unanswered; }
+    else { badge.style.display = 'none'; }
+
+    // Filter tabs
+    const tabs = document.getElementById('filterTabs');
+    tabs.innerHTML = `<button class="tab ${activeFilter==='all'?'active':''}" onclick="setFilter('all')">All</button>`;
+
+    // Table
+    const filtered = activeFilter === 'all' ? all : all.filter(r => r.sessionId === activeFilter);
+    const tbody = document.getElementById('reservationsBody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">◈</div>No registrations yet</div></td></tr>`;
+    } else {
+      tbody.innerHTML = filtered.slice().reverse().map(r => `
+        <tr>
+          <td>${r.name}</td>
+          <td>${r.cls}</td>
+          <td style="color:var(--text-dim);font-size:11px">${r.email}</td>
+          <td style="color:var(--text-dim);font-size:10px">${new Date(r.timestamp).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</td>
+          <td style="text-align:center;">
+            <input type="checkbox" class="admitted-check" ${r.admitted ? 'checked' : ''} onchange="toggleAdmitted(${r.id}, this.checked)" />
+          </td>
+          <td>
+            <input type="text" class="comment-input" value="${r.comment || ''}" placeholder="Add note..." onblur="saveComment(${r.id}, this.value)" />
+          </td>
+          <td><button class="delete-btn" onclick="deleteReservation(${r.id})">✕</button></td>
+        </tr>`).join('');
+    }
+  }
+
+  function setFilter(f) {
+    activeFilter = f;
+    renderAdmin();
+  }
+
+  function deleteReservation(id) {
+    const updated = getReservations().filter(r => r.id !== id);
+    saveReservations(updated);
+    renderAdmin();
+    showToast('Reservation removed');
+  }
+
+  function exportCSV() {
+    const all = getReservations();
+    if (!all.length) return showToast('No reservations to export', true);
+    const rows = [['Name','Class','Email','Registered At','Admitted','Comment']];
+    all.forEach(r => rows.push([r.name, r.cls, r.email, new Date(r.timestamp).toLocaleString(), r.admitted ? 'Yes' : 'No', r.comment || '']));
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'microbit-reservations.csv';
+    a.click(); URL.revokeObjectURL(url);
+    showToast('✓ CSV exported');
+  }
+
+  // Init
+  // (no week grid needed)
+
+  // Modal
+  function openQuestionModal() {
+    document.getElementById('questionModal').classList.add('open');
+  }
+  function closeQuestionModal() {
+    document.getElementById('questionModal').classList.remove('open');
+    document.getElementById('qName').value = '';
+    document.getElementById('qEmail').value = '';
+    document.getElementById('qText').value = '';
+  }
+  document.getElementById('questionModal').addEventListener('click', function(e) {
+    if (e.target === this) closeQuestionModal();
+  });
+
+  function getQuestions() {
+    try { return JSON.parse(localStorage.getItem('microbit_questions') || '[]'); }
+    catch { return []; }
+  }
+  function saveQuestions(arr) {
+    localStorage.setItem('microbit_questions', JSON.stringify(arr));
+  }
+
+  function submitQuestion() {
+    const name = document.getElementById('qName').value.trim();
+    const email = document.getElementById('qEmail').value.trim();
+    const text = document.getElementById('qText').value.trim();
+    if (!name) return showToast('⚠ Please enter your name', true);
+    if (!email || !email.includes('@')) return showToast('⚠ Please enter a valid email', true);
+    if (!text) return showToast('⚠ Please enter your question', true);
+
+    const questions = getQuestions();
+    questions.push({ id: Date.now(), name, email, text, answer: '', timestamp: new Date().toISOString() });
+    saveQuestions(questions);
+    closeQuestionModal();
+    showToast('✓ Question submitted! We\'ll get back to you soon.');
+  }
+
+  // Admin section tabs
+  function switchAdminTab(tab) {
+    document.getElementById('sectionRegistrations').style.display = tab === 'registrations' ? 'block' : 'none';
+    document.getElementById('sectionQuestions').style.display = tab === 'questions' ? 'block' : 'none';
+    document.getElementById('tabRegistrations').classList.toggle('active', tab === 'registrations');
+    document.getElementById('tabQuestions').classList.toggle('active', tab === 'questions');
+    if (tab === 'questions') renderQuestions();
+  }
+
+  function renderQuestions() {
+    const questions = getQuestions();
+    const container = document.getElementById('questionsList');
+    const badge = document.getElementById('questionsBadge');
+    const unanswered = questions.filter(q => !q.answer).length;
+    if (unanswered > 0) { badge.style.display = 'inline-flex'; badge.textContent = unanswered; }
+    else { badge.style.display = 'none'; }
+
+    if (questions.length === 0) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">◈</div>No questions yet</div>`;
+      return;
+    }
+    container.innerHTML = questions.slice().reverse().map(q => `
+      <div class="question-card ${q.answer ? 'answered' : ''}" id="qcard-${q.id}">
+        <div class="q-meta">
+          <span class="q-name">${q.name}</span>
+          <span class="q-email">${q.email}</span>
+          ${q.answer ? '<span class="q-answered-tag">✓ Answered</span>' : ''}
+          <span class="q-date">${new Date(q.timestamp).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>
+        </div>
+        <div class="q-text">${q.text}</div>
+        <div class="q-answer-label">Your Answer</div>
+        <textarea class="q-answer-input" id="ans-${q.id}" placeholder="Type your answer here...">${q.answer || ''}</textarea>
+        <div class="q-actions">
+          <button class="q-save-btn" onclick="saveAnswer(${q.id})">⬡ Save Answer</button>
+          <button class="q-delete-btn" onclick="deleteQuestion(${q.id})">✕ Delete</button>
+        </div>
+      </div>`).join('');
+  }
+
+  function saveAnswer(id) {
+    const answer = document.getElementById(`ans-${id}`).value.trim();
+    const questions = getQuestions();
+    const q = questions.find(q => q.id === id);
+    if (q) { q.answer = answer; saveQuestions(questions); }
+    renderQuestions();
+    showToast('✓ Answer saved');
+  }
+
+  function deleteQuestion(id) {
+    const updated = getQuestions().filter(q => q.id !== id);
+    saveQuestions(updated);
+    renderQuestions();
+    showToast('Question removed');
+  }
+
+  // Admin: toggle admitted
+  function toggleAdmitted(id, checked) {
+    const all = getReservations();
+    const r = all.find(r => r.id === id);
+    if (r) { r.admitted = checked; saveReservations(all); }
+  }
+
+  // Admin: save comment
+  function saveComment(id, value) {
+    const all = getReservations();
+    const r = all.find(r => r.id === id);
+    if (r) { r.comment = value; saveReservations(all); }
+  }
+</script>
+</body>
+</html>
